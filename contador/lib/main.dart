@@ -10,60 +10,114 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 59, 4, 154)),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'This is an app'),
+      home: HomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomePageState extends State<HomePage> {
+  int count = 0;
 
-  void _incrementCounter() {
+  void decrement() {
     setState(() {
-      _counter++;
+      if (!isEmpty) {
+        count--;
+      }
     });
   }
+
+  void increment() {
+    setState(() {
+      if (!isFull) {
+        count++;
+      }
+    });
+  }
+
+  bool get isEmpty => count == 0;
+  bool get isFull => count == 20;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
+        backgroundColor: Colors.red,
+        body: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage('assets/images/image.jpg'),
+                fit: BoxFit.cover),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                isFull ? 'Lotado' : 'Pode entrar',
+                style: const TextStyle(
+                  fontSize: 30,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(40),
+                child: Text(
+                  count.toString(),
+                  style: TextStyle(
+                    fontSize: 100,
+                    color: isFull ? Colors.red :  Colors.white,
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: decrement,
+                    style: TextButton.styleFrom(
+                        backgroundColor: isEmpty
+                            ? Colors.white.withOpacity(0.2)
+                            : Colors.white,
+                        fixedSize: const Size(100, 100),
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        )),
+                    child: const Text(
+                      "Saiu",
+                      style: TextStyle(color: Colors.black, fontSize: 16),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 32,
+                  ),
+                  TextButton(
+                    onPressed: increment,
+                    style: TextButton.styleFrom(
+                        backgroundColor: isFull
+                            ? Colors.white.withOpacity(0.2)
+                            : Colors.white,
+                        fixedSize: const Size(100, 100),
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        )),
+                    child: const Text(
+                      "Entrou",
+                      style: TextStyle(color: Colors.black, fontSize: 16),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ));
   }
 }
