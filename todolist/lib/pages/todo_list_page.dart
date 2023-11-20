@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todolist/models/todo.dart';
+import 'package:todolist/repositories/todo_repository.dart';
 import 'package:todolist/widgets/todo_list_item.dart';
 
 class TodoListPage extends StatefulWidget {
@@ -11,10 +12,24 @@ class TodoListPage extends StatefulWidget {
 
 class _TodoListPageState extends State<TodoListPage> {
   final TextEditingController todoController = TextEditingController();
+  final TodoRepository todoRepository = TodoRepository();
+  FocusNode inputFocus = FocusNode();
 
   List<Todo> todos = [];
   Todo? deletedTodo;
   int? deletedTodoPos;
+
+  String? errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    todoRepository.getTodoList().then((value) {
+      setState(() {
+        todos = value;
+      });
+    });
+  }
 
   void onDelete(Todo todo) {
     deletedTodo = todo;
@@ -22,6 +37,7 @@ class _TodoListPageState extends State<TodoListPage> {
 
     setState(() {
       todos.remove(todo);
+      todoRepository.saveTodoList(todos);
     });
 
     ScaffoldMessenger.of(context).clearSnackBars();
@@ -38,6 +54,7 @@ class _TodoListPageState extends State<TodoListPage> {
           onPressed: () {
             setState(() {
               todos.insert(deletedTodoPos!, deletedTodo!);
+              todoRepository.saveTodoList(todos);
             });
           },
         ),
@@ -51,8 +68,8 @@ class _TodoListPageState extends State<TodoListPage> {
         context: context,
         builder: (context) => AlertDialog(
               title: const Text('Limpar tudo?'),
-              content:
-                  const Text("Você tem certeza que deseja remover todas as tarefas"),
+              content: const Text(
+                  "Você tem certeza que deseja remover todas as tarefas"),
               actions: [
                 TextButton(
                   onPressed: () {
@@ -93,8 +110,19 @@ class _TodoListPageState extends State<TodoListPage> {
                     Expanded(
                       child: TextField(
                         controller: todoController,
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
+                        focusNode: inputFocus,
+                        decoration: InputDecoration(
+                            errorText: errorText,
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color(0xff00d7f3),
+                                width: 2,
+                              ),
+                            ),
+                            border: const OutlineInputBorder(),
+                            labelStyle: const TextStyle(
+                              color: Color(0xff00d7f3),
+                            ),
                             labelText: 'Adicione uma tarefa',
                             hintText: 'Estudar flutter'),
                       ),
@@ -108,10 +136,17 @@ class _TodoListPageState extends State<TodoListPage> {
 
                         if (todoText.isNotEmpty) {
                           setState(() {
+                            errorText = null;
                             Todo newTodo =
                                 Todo(title: todoText, dateTime: DateTime.now());
                             todos.add(newTodo);
                             todoController.clear();
+                            inputFocus.requestFocus();
+                            todoRepository.saveTodoList(todos);
+                          });
+                        } else {
+                          setState(() {
+                            errorText = 'O título não pode ser vazio';
                           });
                         }
                       },
